@@ -5,6 +5,21 @@ import type { AstroCookies } from 'astro';
 const mockAdminId = 'ff8de013-6287-4794-a49c-b9b84f739c1a';
 
 // In-memory mock database
+const mockCompanies = [
+  { id: 'company-id-1', name: 'Party People', slug: 'party-people', created_by: mockAdminId, created_at: new Date().toISOString() }
+];
+
+const mockCompanyMembers = [
+  { id: 'cm-id-1', company_id: 'company-id-1', user_id: mockAdminId, role: 'admin', created_at: new Date().toISOString() },
+  ...Array.from({ length: 17 }, (_, i) => ({
+    id: `cm-id-attendee-${i + 1}`,
+    company_id: 'company-id-1',
+    user_id: `user-id-attendee-${i + 1}`,
+    role: i < 2 ? 'admin' : 'member',
+    created_at: new Date().toISOString()
+  }))
+];
+
 const mockProfiles = [
   {
     id: mockAdminId,
@@ -13,36 +28,46 @@ const mockProfiles = [
     role: 'admin',
     created_at: new Date().toISOString()
   },
-  {
-    id: 'user-id-attendee-1',
-    email: 'attendee1@example.com',
-    full_name: 'John Doe',
+  ...Array.from({ length: 17 }, (_, i) => ({
+    id: `user-id-attendee-${i + 1}`,
+    email: `attendee${i + 1}@example.com`,
+    full_name: [
+      'John Doe', 'Jane Smith', 'Alice Johnson', 'Bob Brown', 
+      'Charlie Green', 'David White', 'Eva Black', 'Alexis Owens',
+      'Angelina Demiroska', 'Anna Li', 'Ash Fetherbay', 'Ashna Reddy',
+      'Ava Zhang', 'Bharath', 'Brendon Mak', 'Bryan Lu', 'Chelsea Chrystal'
+    ][i] || `Attendee ${i + 1}`,
     role: 'attendee',
     created_at: new Date().toISOString()
-  }
+  }))
 ];
 
-const mockCompanies = [{ id: 'company-id-1', name: 'Party People', slug: 'party-people', created_by: mockAdminId, created_at: new Date().toISOString() }];
-const mockCompanyMembers = [{ id: 'cm-id-1', company_id: 'company-id-1', user_id: mockAdminId, role: 'admin', created_at: new Date().toISOString() }];
-const mockTeams = [{ id: 'team-id-1', company_id: 'company-id-1', name: 'Season 1', invite_code: 'abc-123', created_by: mockAdminId, created_at: new Date().toISOString() }];
+const mockTeams = [
+  { id: 'team-id-1', company_id: 'company-id-1', name: 'Season 1', invite_code: 'abc-123', created_by: mockAdminId, created_at: new Date().toISOString() },
+  { id: 'team-id-2', company_id: 'company-id-1', name: 'Engineering Team', invite_code: 'eng-456', created_by: mockAdminId, created_at: new Date().toISOString() },
+  { id: 'team-id-3', company_id: 'company-id-1', name: 'Design Team', invite_code: 'des-789', created_by: mockAdminId, created_at: new Date().toISOString() },
+  { id: 'team-id-4', company_id: 'company-id-1', name: 'Marketing & PR', invite_code: 'mkt-101', created_by: mockAdminId, created_at: new Date().toISOString() },
+  { id: 'team-id-5', company_id: 'company-id-1', name: 'Operations Team', invite_code: 'ops-202', created_by: mockAdminId, created_at: new Date().toISOString() }
+];
+
 const mockTeamMembers = [
   { id: 'roster-id-1', full_name: 'John Doe', email: 'john@example.com', claimed_user_id: 'user-id-attendee-1' },
-  { id: 'roster-id-2', full_name: 'Jane Smith', email: 'jane@example.com', claimed_user_id: null },
-  { id: 'roster-id-3', full_name: 'Alice Johnson', email: 'alice@example.com', claimed_user_id: null },
-  { id: 'roster-id-4', full_name: 'Bob Brown', email: 'bob@example.com', claimed_user_id: null },
-  { id: 'roster-id-5', full_name: 'Charlie Green', email: 'charlie@example.com', claimed_user_id: null },
-  { id: 'roster-id-6', full_name: 'David White', email: 'david@example.com', claimed_user_id: null },
-  { id: 'roster-id-7', full_name: 'Eva Black', email: 'eva@example.com', claimed_user_id: null },
-  { id: 'roster-id-8', full_name: 'Alexis Owens', email: 'alexis@example.com', claimed_user_id: null },
-  { id: 'roster-id-9', full_name: 'Angelina Demiroska', email: 'angelina@example.com', claimed_user_id: null },
-  { id: 'roster-id-10', full_name: 'Anna Li', email: 'anna@example.com', claimed_user_id: null },
-  { id: 'roster-id-11', full_name: 'Ash Fetherbay', email: 'ash@example.com', claimed_user_id: null },
-  { id: 'roster-id-12', full_name: 'Ashna Reddy', email: 'ashna@example.com', claimed_user_id: null },
-  { id: 'roster-id-13', full_name: 'Ava Zhang', email: 'ava@example.com', claimed_user_id: null },
-  { id: 'roster-id-14', full_name: 'Bharath', email: 'bharath@example.com', claimed_user_id: null },
-  { id: 'roster-id-15', full_name: 'Brendon Mak', email: 'brendon@example.com', claimed_user_id: null },
-  { id: 'roster-id-16', full_name: 'Bryan Lu', email: 'bryan@example.com', claimed_user_id: null },
-  { id: 'roster-id-17', full_name: 'Chelsea Chrystal', email: 'chelsea@example.com', claimed_user_id: null },
+  { id: 'roster-id-2', full_name: 'Jane Smith', email: 'jane@example.com', claimed_user_id: 'user-id-attendee-2' },
+  { id: 'roster-id-3', full_name: 'Alice Johnson', email: 'alice@example.com', claimed_user_id: 'user-id-attendee-3' },
+  { id: 'roster-id-4', full_name: 'Bob Brown', email: 'bob@example.com', claimed_user_id: 'user-id-attendee-4' },
+  { id: 'roster-id-5', full_name: 'Charlie Green', email: 'charlie@example.com', claimed_user_id: 'user-id-attendee-5' },
+  { id: 'roster-id-6', full_name: 'David White', email: 'david@example.com', claimed_user_id: 'user-id-attendee-6' },
+  { id: 'roster-id-7', full_name: 'Eva Black', email: 'eva@example.com', claimed_user_id: 'user-id-attendee-7' },
+  { id: 'roster-id-8', full_name: 'Alexis Owens', email: 'alexis@example.com', claimed_user_id: 'user-id-attendee-8' },
+  { id: 'roster-id-9', full_name: 'Angelina Demiroska', email: 'angelina@example.com', claimed_user_id: 'user-id-attendee-9' },
+  { id: 'roster-id-10', full_name: 'Anna Li', email: 'anna@example.com', claimed_user_id: 'user-id-attendee-10' },
+  { id: 'roster-id-11', full_name: 'Ash Fetherbay', email: 'ash@example.com', claimed_user_id: 'user-id-attendee-11' },
+  { id: 'roster-id-12', full_name: 'Ashna Reddy', email: 'ashna@example.com', claimed_user_id: 'user-id-attendee-12' },
+  { id: 'roster-id-13', full_name: 'Ava Zhang', email: 'ava@example.com', claimed_user_id: 'user-id-attendee-13' },
+  { id: 'roster-id-14', full_name: 'Bharath', email: 'bharath@example.com', claimed_user_id: 'user-id-attendee-14' },
+  { id: 'roster-id-15', full_name: 'Brendon Mak', email: 'brendon@example.com', claimed_user_id: 'user-id-attendee-15' },
+  { id: 'roster-id-16', full_name: 'Bryan Lu', email: 'bryan@example.com', claimed_user_id: 'user-id-attendee-16' },
+  { id: 'roster-id-17', full_name: 'Chelsea Chrystal', email: 'chelsea@example.com', claimed_user_id: 'user-id-attendee-17' },
   { id: 'roster-id-18', full_name: 'Chetu Khandavilli', email: 'chetu@example.com', claimed_user_id: null },
   { id: 'roster-id-19', full_name: "Christian 'Chris' Feliciano", email: 'christian@example.com', claimed_user_id: null },
   { id: 'roster-id-20', full_name: 'Fay Yu', email: 'fay@example.com', claimed_user_id: null },
