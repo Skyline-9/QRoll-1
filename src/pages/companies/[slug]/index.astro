@@ -6,7 +6,7 @@ import AstroButton from '../../../components/AstroButton.astro';
 import AstroBadge from '../../../components/AstroBadge.astro';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
-import { Users, Plus, Link, Search, Copy, Check } from 'lucide-react';
+import { Users, Plus, Link, Search, Copy, Check, Folder } from 'lucide-react';
 
 const { slug } = Astro.params;
 const supabase = createSupabaseClient(Astro.cookies);
@@ -101,11 +101,11 @@ const members = membersRes.data || [];
         </div>
         <p class="text-muted-foreground mt-1 text-sm">Manage teams and view roster membership within the company.</p>
         <div class="flex gap-2.5 mt-3">
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground border border-border">
-            <Users className="w-3.5 h-3.5 text-muted-foreground" />
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-accent text-accent-foreground border border-border">
+            <Folder className="w-3.5 h-3.5 text-muted-foreground" />
             {teams.length} {teams.length === 1 ? 'Team' : 'Teams'}
           </span>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground border border-border">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-accent text-accent-foreground border border-border">
             <Users className="w-3.5 h-3.5 text-muted-foreground" />
             {members.length} {members.length === 1 ? 'Member' : 'Members'}
           </span>
@@ -114,7 +114,7 @@ const members = membersRes.data || [];
     </div>
 
     {errorMsg && (
-      <div class="p-4 mb-6 text-sm text-red-500 bg-red-50 rounded-2xl border border-red-200">
+      <div class="p-4 mb-6 text-sm text-red-500 bg-red-50 rounded-lg border border-red-200">
         {errorMsg}
       </div>
     )}
@@ -173,7 +173,7 @@ const members = membersRes.data || [];
                   </div>
                   
                   {isAdmin && (
-                    <div class="space-y-1.5 text-xs text-muted-foreground bg-muted/40 p-2.5 rounded-xl border border-border/60">
+                    <div class="space-y-1.5 text-xs text-muted-foreground bg-muted/40 p-2.5 rounded-lg border border-border/60">
                       <div class="flex items-center justify-between gap-1">
                         <span class="flex items-center gap-1 font-medium text-foreground/80">
                           <Link className="w-3.5 h-3.5 text-muted-foreground" /> Invite Link
@@ -183,6 +183,7 @@ const members = membersRes.data || [];
                           class="copy-btn p-1 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
                           data-copy-text={inviteUrl}
                           title="Copy invite link"
+                          aria-label="Copy invite link"
                         >
                           <Copy className="w-3.5 h-3.5 copy-icon" />
                           <Check className="w-3.5 h-3.5 check-icon hidden text-green-500" />
@@ -208,7 +209,7 @@ const members = membersRes.data || [];
           );
         })}
         {teams.length === 0 && (
-          <div class="col-span-full p-12 text-center text-muted-foreground text-sm border rounded-2xl bg-card">
+          <div class="col-span-full p-12 text-center text-muted-foreground text-sm border rounded-lg bg-card">
             No teams in this company yet.
           </div>
         )}
@@ -263,6 +264,7 @@ const members = membersRes.data || [];
 
   // Copy functionality
   document.querySelectorAll('.copy-btn').forEach((btn) => {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     btn.addEventListener('click', async () => {
       const text = btn.getAttribute('data-copy-text');
       if (!text) return;
@@ -277,9 +279,14 @@ const members = membersRes.data || [];
           copyIcon.classList.add('hidden');
           checkIcon.classList.remove('hidden');
 
-          setTimeout(() => {
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+          }
+
+          timeoutId = setTimeout(() => {
             copyIcon.classList.remove('hidden');
             checkIcon.classList.add('hidden');
+            timeoutId = undefined;
           }, 2000);
         }
       } catch (err) {
