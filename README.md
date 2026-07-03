@@ -232,34 +232,34 @@ graph TD
 graph LR
     P[profiles] --> PM[roster_members]
     subgraph "profiles Fields"
-        P_id[ id ]
-        P_email[ email ]
-        P_name[ full_name ]
-        P_role[ role ]
+        P_id["id"]
+        P_email["email"]
+        P_name["full_name"]
+        P_role["role"]
     end
     
     subgraph "roster_members Fields"
-        PM_id[ id ]
-        PM_email[ email (unique) ]
-        PM_name[ full_name ]
-        PM_claimed[ claimed_user_id ]
-        PM_notes[ notes ]
+        PM_id["id"]
+        PM_email["email (unique)"]
+        PM_name["full_name"]
+        PM_claimed["claimed_user_id"]
+        PM_notes["notes"]
     end
     
     subgraph "events Fields"
-        E_id[ id ]
-        E_title[ title ]
-        E_starts[ starts_at ]
-        E_qr[ qr_token ]
-        E_historical[ is_historical ]
+        E_id["id"]
+        E_title["title"]
+        E_starts["starts_at"]
+        E_qr["qr_token"]
+        E_historical["is_historical"]
     end
     
     subgraph "attendance Fields"
-        A_id[ id ]
-        A_status[ status ]
-        A_note[ note ]
-        A_checkin[ checked_in_at ]
-        A_ip[ ip_address ]
+        A_id["id"]
+        A_status["status"]
+        A_note["note"]
+        A_checkin["checked_in_at"]
+        A_ip["ip_address"]
     end
 ```
 
@@ -387,7 +387,7 @@ The GitHub PR template includes a readiness checklist covering code, security, d
 
 [MIT License](LICENSE)
 
-© 2024 Michelle Zhuang
+© 2026 Michelle Zhuang
 
 </div>
 
@@ -404,8 +404,4 @@ The GitHub PR template includes a readiness checklist covering code, security, d
 
 ---
 
-*
-
-Designed with ❤️ for the "Active Canvas" experience using QRoll's design system.*
-
-*
+*Designed with ❤️ for the "Active Canvas" experience using QRoll's design system.*
