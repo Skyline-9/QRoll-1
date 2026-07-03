@@ -204,53 +204,71 @@ The "Active Canvas" design system features:
 
 ## 📊 Database Schema
 
+### Core Tables Relationship
+
 ```mermaid
-diagram TD
-    subgraph "Core Tables"
-        P[profiles] --> PM[roster_members] : "Auto-Claim Trigger"
-        PM --> A[attendance] : "One-to-Many"
-        PM --> E[events] : "Many-to-One (row level)"
-    end
-    
+graph TD
+    P[profiles] --> PM[roster_members]
+    PM --> E[events]
+    PM --> A[attendance]
+    PM -.->|Auto-Claim| P
+```
+
+### Detailed Field Mapping
+
+| **profiles** | **roster_members** | **events** | **attendance** |
+|-------------|-------------------|------------|---------------|
+| `id` | `id` | `id` | `id` |
+| `email` | `email (unique)` | `title` | `status` |
+| `full_name` | `full_name` | `starts_at` | `note` |
+| `role` | `claimed_user_id` | `qr_token (nullable)` | `checked_in_at` |
+| | `notes (nullable)` | `is_historical (bool)` | `ip_address` |
+| | | `checkin_starts_at` | `user_agent` |
+| | | `checkin_ends_at` |
+
+### Schema Field Reference
+
+```mermaid
+graph LR
+    P[profiles] --> PM[roster_members]
     subgraph "profiles Fields"
-        P --> "id (auth.users.id)"
-        P --> "email"
-        P --> "full_name"
-        P --> "role"
+        P_id[ id ]
+        P_email[ email ]
+        P_name[ full_name ]
+        P_role[ role ]
     end
     
     subgraph "roster_members Fields"
-        PM --> "id"
-        PM --> "email (unique)"
-        PM --> "full_name"
-        PM --> "claimed_user_id"
-        PM --> "notes (nullable)"
+        PM_id[ id ]
+        PM_email[ email (unique) ]
+        PM_name[ full_name ]
+        PM_claimed[ claimed_user_id ]
+        PM_notes[ notes ]
     end
     
     subgraph "events Fields"
-        E --> "id"
-        E --> "title"
-        E --> "starts_at"
-        E --> "checkin_starts_at"
-        E --> "checkin_ends_at"
-        E --> "qr_token (nullable)"
-        E --> "is_historical (bool)"
+        E_id[ id ]
+        E_title[ title ]
+        E_starts[ starts_at ]
+        E_qr[ qr_token ]
+        E_historical[ is_historical ]
     end
     
     subgraph "attendance Fields"
-        A --> "id"
-        A --> "status"
-        A --> "note (nullable)"
-        A --> "checked_in_at"
-        A --> "ip_address"
-        A --> "user_agent"
+        A_id[ id ]
+        A_status[ status ]
+        A_note[ note ]
+        A_checkin[ checked_in_at ]
+        A_ip[ ip_address ]
     end
-
-    style P fill:#2F2738,color:#FFFDF9
-    style PM fill:#F5EFFA,color:#2F2738
-    style E fill:#E4C1F9,color:#2F2738
-    style A fill:#D0F4DE,color:#2F2738
 ```
+
+### Visual Schema Key
+
+**profiles** - Eggplant Ink | **#2F2738**
+**roster_members** - Warm Milk | **#FFFDF9**
+**events** - Soft Lavender | **#E4C1F9**
+**attendance** - Fresh Mint | **#D0F4DE**
 
 ## 🔄 Workflow Diagrams
 
