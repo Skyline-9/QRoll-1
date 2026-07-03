@@ -263,6 +263,15 @@ export class MockQueryBuilder {
 
     if (this.operation === 'select') {
       let result = [...dataset];
+      if (this.table === 'company_members') {
+        result = result.map(m => {
+          const p = mockProfiles.find(prof => prof.id === m.user_id);
+          return {
+            ...m,
+            profiles: p ? { full_name: p.full_name, email: p.email } : null
+          };
+        });
+      }
       for (const filter of this.filters) {
         if (filter.op === 'eq') {
           result = result.filter(item => item[filter.field] === filter.value);
