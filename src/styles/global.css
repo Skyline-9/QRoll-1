@@ -35,6 +35,7 @@
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
 
+  --radius-xl: var(--radius);
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);

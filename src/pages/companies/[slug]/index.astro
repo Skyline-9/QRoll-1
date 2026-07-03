@@ -180,6 +180,7 @@ const members = membersRes.data || [];
                         </span>
                         <button
                           type="button"
+                          id={`copy-btn-${t.id}`}
                           class="copy-btn p-1 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
                           data-copy-text={inviteUrl}
                           title="Copy invite link"
@@ -208,6 +209,7 @@ const members = membersRes.data || [];
             </div>
           );
         })}
+        <div id="teams-empty-state" class="col-span-full p-8 text-center text-muted-foreground text-sm border rounded-lg bg-card" hidden>No matching teams found.</div>
         {teams.length === 0 && (
           <div class="col-span-full p-12 text-center text-muted-foreground text-sm border rounded-lg bg-card">
             No teams in this company yet.
@@ -251,6 +253,7 @@ const members = membersRes.data || [];
               </div>
             );
           })}
+          <div id="members-empty-state" class="py-6 text-center text-muted-foreground text-sm" hidden>No matching roster members found.</div>
         </div>
       </div>
     </details>
@@ -262,28 +265,40 @@ const members = membersRes.data || [];
   const searchInput = document.getElementById('team-search') as HTMLInputElement | null;
   searchInput?.addEventListener('input', (e) => {
     const q = (e.target as HTMLInputElement).value.toLowerCase();
-    document.querySelectorAll('.team-card').forEach((card) => {
+    let visibleTeamsCount = 0;
+    const cards = document.querySelectorAll('.team-card');
+    cards.forEach((card) => {
       const name = card.getAttribute('data-team-name')?.toLowerCase() || '';
-      if (name.includes(q)) {
-        card.classList.remove('hidden');
-      } else {
-        card.classList.add('hidden');
+      const isMatch = name.includes(q);
+      card.toggleAttribute('hidden', !isMatch);
+      if (isMatch) {
+        visibleTeamsCount++;
       }
     });
+    const teamsEmptyState = document.getElementById('teams-empty-state');
+    if (teamsEmptyState) {
+      teamsEmptyState.toggleAttribute('hidden', cards.length === 0 || visibleTeamsCount > 0);
+    }
   });
 
   // Member search functionality
   const memberSearchInput = document.getElementById('member-search') as HTMLInputElement | null;
   memberSearchInput?.addEventListener('input', (e) => {
     const q = (e.target as HTMLInputElement).value.toLowerCase();
-    document.querySelectorAll('.member-row').forEach((row) => {
+    let visibleMembersCount = 0;
+    const rows = document.querySelectorAll('.member-row');
+    rows.forEach((row) => {
       const text = row.textContent?.toLowerCase() || '';
-      if (text.includes(q)) {
-        row.classList.remove('hidden');
-      } else {
-        row.classList.add('hidden');
+      const isMatch = text.includes(q);
+      row.toggleAttribute('hidden', !isMatch);
+      if (isMatch) {
+        visibleMembersCount++;
       }
     });
+    const membersEmptyState = document.getElementById('members-empty-state');
+    if (membersEmptyState) {
+      membersEmptyState.toggleAttribute('hidden', rows.length === 0 || visibleMembersCount > 0);
+    }
   });
 
   // Copy functionality
@@ -294,7 +309,11 @@ const members = membersRes.data || [];
       if (!text) return;
 
       try {
-        await navigator.clipboard.writeText(text);
+        if (typeof navigator !== 'undefined' && navigator.clipboard) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          throw new Error('Clipboard API is not available');
+        }
 
         const copyIcon = btn.querySelector('.copy-icon');
         const checkIcon = btn.querySelector('.check-icon');
