@@ -7,6 +7,7 @@ import AstroBadge from '../../../components/AstroBadge.astro';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import { Users, Plus, Link, Search, Copy, Check, Folder, ChevronDown } from 'lucide-react';
+import { formatPacificDate } from '../../../lib/timeLogic';
 
 const { slug } = Astro.params;
 const supabase = createSupabaseClient(Astro.cookies);
@@ -172,7 +173,7 @@ const members = membersRes.data || [];
                     <h3 class="font-semibold text-lg text-foreground truncate" title={t.name}>{t.name}</h3>
                   </div>
                   <p class="text-xs text-muted-foreground mt-1">
-                    Created on {new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    Created on {t.created_at ? formatPacificDate(t.created_at) : 'N/A'}
                   </p>
                   
                   {isAdmin && (
