@@ -6,7 +6,7 @@ import AstroButton from '../../../components/AstroButton.astro';
 import AstroBadge from '../../../components/AstroBadge.astro';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
-import { Users, Plus, Link, Search, Copy, Check, Folder } from 'lucide-react';
+import { Users, Plus, Link, Search, Copy, Check, Folder, ChevronDown } from 'lucide-react';
 
 const { slug } = Astro.params;
 const supabase = createSupabaseClient(Astro.cookies);
@@ -37,7 +37,7 @@ const [memberInfoRes, profileRes] = await Promise.all([
     .single()
 ]);
 
-const isCompanyMember = !!memberInfoRes.data;
+
 const isCompanyAdmin = memberInfoRes.data?.role === 'admin';
 const isGlobalAdmin = profileRes.data?.role === 'admin';
 const isAdmin = isGlobalAdmin || isCompanyAdmin;
@@ -216,34 +216,44 @@ const members = membersRes.data || [];
       </div>
     </div>
 
-    {/* Members Column - Commented out for now, to be refactored as a collapsible roster in Task 3 */}
-    {/*
-    {isAdmin && (
-      <div class="mt-8 space-y-4">
-        <h2 class="text-xl font-semibold tracking-tight">Company Members</h2>
-        <AstroCard className="p-4">
-          <div class="divide-y divide-border">
-            {members.map(m => {
-              const p = (m.profiles as any) || {};
-              const name = p.full_name || 'Anonymous Member';
-              const email = p.email || 'No email';
-              return (
-                <div class="py-3 flex items-center justify-between gap-2 first:pt-0 last:pb-0">
-                  <div class="min-w-0">
-                    <p class="text-sm font-semibold truncate text-foreground">{name}</p>
-                    <p class="text-xs text-muted-foreground truncate">{email}</p>
-                  </div>
-                  <AstroBadge variant={m.role === 'admin' ? 'default' : 'secondary'} className="shrink-0">
-                    {m.role}
-                  </AstroBadge>
+    <details class="group bg-card border border-border rounded-lg mt-8">
+      <summary class="flex justify-between items-center p-4 cursor-pointer font-semibold select-none">
+        <span class="flex items-center gap-2">
+          <Users className="w-5 h-5 text-muted-foreground" />
+          Company Roster
+        </span>
+        <ChevronDown className="w-5 h-5 text-muted-foreground group-open:rotate-180 transition-transform duration-200" />
+      </summary>
+      <div class="p-4 border-t border-border space-y-4">
+        <div class="relative w-full sm:max-w-xs">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            id="member-search"
+            type="text"
+            placeholder="Search members..."
+            className="pl-9 w-full bg-background"
+          />
+        </div>
+        <div class="divide-y divide-border">
+          {members.map(m => {
+            const p = (m.profiles as any) || {};
+            const name = p.full_name || 'Anonymous Member';
+            const email = p.email || 'No email';
+            return (
+              <div class="member-row py-3 flex items-center justify-between gap-2 first:pt-0 last:pb-0">
+                <div class="min-w-0">
+                  <p class="text-sm font-semibold truncate text-foreground">{name}</p>
+                  <p class="text-xs text-muted-foreground truncate">{email}</p>
                 </div>
-              );
-            })}
-          </div>
-        </AstroCard>
+                <AstroBadge variant={m.role === 'admin' ? 'default' : 'secondary'} className="shrink-0">
+                  {m.role}
+                </AstroBadge>
+              </div>
+            );
+          })}
+        </div>
       </div>
-    )}
-    */}
+    </details>
   </main>
 </Layout>
 
@@ -258,6 +268,20 @@ const members = membersRes.data || [];
         card.classList.remove('hidden');
       } else {
         card.classList.add('hidden');
+      }
+    });
+  });
+
+  // Member search functionality
+  const memberSearchInput = document.getElementById('member-search') as HTMLInputElement | null;
+  memberSearchInput?.addEventListener('input', (e) => {
+    const q = (e.target as HTMLInputElement).value.toLowerCase();
+    document.querySelectorAll('.member-row').forEach((row) => {
+      const text = row.textContent?.toLowerCase() || '';
+      if (text.includes(q)) {
+        row.classList.remove('hidden');
+      } else {
+        row.classList.add('hidden');
       }
     });
   });
