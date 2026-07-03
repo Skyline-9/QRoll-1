@@ -66,11 +66,13 @@ We will expand the local dev state in `src/lib/supabase.ts` with:
     *   A search text input styled with `src/components/ui/input` (`Search teams...`).
     *   A "+ Create Team" button triggering the modal/card.
 *   **Teams Grid:**
-    *   An auto-fit grid (`repeat(auto-fit, minmax(280px, 1fr))`).
+    *   An auto-fit grid with larger cards: `grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3` or `repeat(auto-fill, minmax(340px, 1fr))`.
     *   Each card features a soft shadow and scale transition on hover.
 *   **Team Card Content:**
-    *   **Team Name:** Large bold text.
-    *   **Minimal Metrics:** A small badge showing `X members • Y events` (calculated dynamically using local references).
+    *   Card padding increased to Spacing Large (`p-6`).
+    *   **Team Name:** Larger bold text (`text-lg font-semibold`).
+    *   **Creation Date:** Inline secondary text below the team name (e.g. `Created on Jul 2, 2026`).
+    *   **Minimal Metrics:** A small badge showing `X members • Y events`.
     *   **Copy Invite Link Button:** A compact button with a copy/link icon. On click, it copies the URL `http://<host>/teams/join/<invite_code>` to the clipboard and briefly changes its label/color to a positive checkmark state (`Copied!`).
     *   **Quick Links:** Bottom-aligned footer buttons mapping to "Manage Events" and "Manage Roster".
 
