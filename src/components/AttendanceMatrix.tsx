@@ -6,7 +6,7 @@ import type { AttendanceData, AttendanceStatus, AttendanceRecord } from "src/lib
 
 interface Props {
   data: AttendanceData;
-  /** URL to POST { roster_member_id, date, note } to. When set, persists to backend instead of localStorage. */
+  /** URL to POST { team_member_id, date, note } to. When set, persists to backend instead of localStorage. */
   noteApiUrl?: string;
   /** Whether the current user can edit notes. */
   canEditNotes?: boolean;
@@ -202,7 +202,7 @@ export const AttendanceMatrix = ({ data, noteApiUrl, canEditNotes = true }: Prop
         const res = await fetch(noteApiUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ roster_member_id: memberId, date, note: trimmed, status: selectedStatus }),
+          body: JSON.stringify({ team_member_id: memberId, date, note: trimmed, status: selectedStatus }),
         });
         if (!res.ok) {
           const text = await res.text();

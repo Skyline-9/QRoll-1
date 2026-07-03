@@ -22,7 +22,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     return new Response('Invalid JSON', { status: 400 });
   }
 
-  const { team_member_id, date, note, status } = body || {};
+  const { team_member_id: raw_team_member_id, roster_member_id, date, note, status } = body || {};
+  const team_member_id = raw_team_member_id || roster_member_id;
   if (!team_member_id || !date) {
     return new Response('Missing team_member_id or date', { status: 400 });
   }

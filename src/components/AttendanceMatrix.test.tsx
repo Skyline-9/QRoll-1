@@ -68,4 +68,45 @@ describe('AttendanceMatrix Scroll Elements', () => {
     fireEvent.click(rightBtn);
     expect(scrollBySpy).toHaveBeenCalledWith(expect.objectContaining({ left: 200, behavior: 'smooth' }));
   });
+
+  it('calls noteApiUrl with team_member_id when editing and saving notes', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      text: () => Promise.resolve('{"ok":true}')
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<AttendanceMatrix data={mockData} noteApiUrl="/api/attendance/note" />);
+
+    // Click the cell to open the editor
+    const cell = screen.getByLabelText('Alex Rivera 2026-06-01 Present');
+    fireEvent.click(cell);
+
+    // Write a note in the textarea
+    const textarea = screen.getByPlaceholderText(/e.g. Sick/i);
+    fireEvent.change(textarea, { target: { value: 'Excused' } });
+
+    // Click Save changes
+    const saveBtn = screen.getByRole('button', { name: /save changes/i });
+    await act(async () => {
+      fireEvent.click(saveBtn);
+    });
+
+    // Check fetch was called with correct payload including team_member_id
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/attendance/note',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({
+          team_member_id: 'member-1',
+          date: '2026-06-01',
+          note: 'Excused',
+          status: 'present'
+        })
+      })
+    );
+
+    vi.unstubAllGlobals();
+  });
 });
