@@ -172,7 +172,7 @@ describe('Reset Password API Endpoint', () => {
       error: null,
     } as any);
     vi.mocked(mockClient.auth.updateUser).mockResolvedValueOnce({
-      data: null,
+      data: { user: null },
       error: { message: 'Weak password or database error' } as any,
     });
 

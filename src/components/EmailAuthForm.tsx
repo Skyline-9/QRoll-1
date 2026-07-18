@@ -77,7 +77,12 @@ export function EmailAuthForm({ endpoint }: Props) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <div className="flex justify-between items-center">
+          <Label htmlFor="password">Password</Label>
+          <a href="/forgot-password" className="text-xs text-muted-foreground hover:text-foreground hover:underline">
+            Forgot password?
+          </a>
+        </div>
         <Input
           id="password"
           type="password"
