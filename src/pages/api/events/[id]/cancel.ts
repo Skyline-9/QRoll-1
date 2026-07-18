@@ -7,15 +7,37 @@ export const POST: APIRoute = async ({ params, cookies, redirect, request }) => 
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return new Response("Unauthorized", { status: 401 });
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", session.user.id)
-    .single();
-  if (profile?.role !== "admin") return new Response("Forbidden", { status: 403 });
-
   const id = params.id;
   if (!id) return new Response("Missing id", { status: 400 });
+
+  // Resolve event and its team's company_id to verify scoped admin access
+  const { data: event } = await supabase
+    .from("events")
+    .select("team_id, teams (company_id)")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (!event) return new Response("Event not found", { status: 404 });
+
+  const companyId = (event.teams as any)?.company_id;
+
+  const [profileRes, companyMemberRes] = await Promise.all([
+    supabase.from("profiles").select("role").eq("id", session.user.id).single(),
+    companyId
+      ? supabase
+          .from("company_members")
+          .select("role")
+          .eq("company_id", companyId)
+          .eq("user_id", session.user.id)
+          .eq("role", "admin")
+          .maybeSingle()
+      : Promise.resolve({ data: null })
+  ]);
+
+  const isGlobalAdmin = profileRes.data?.role === "admin";
+  const isCompanyAdmin = !!companyMemberRes.data;
+
+  if (!isGlobalAdmin && !isCompanyAdmin) return new Response("Forbidden", { status: 403 });
 
   let undo = false;
   const ct = request.headers.get("content-type") || "";
