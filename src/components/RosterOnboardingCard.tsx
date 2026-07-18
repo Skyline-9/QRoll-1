@@ -293,7 +293,12 @@ export function RosterOnboardingCard({ fuzzyMatches, allUnclaimed, redirectTo, t
           />
           <div className="rob-scroll">
             {filteredMembers.length === 0 ? (
-              <div className="rob-empty">No members found</div>
+              <div className="rob-empty">
+                <div>No members found</div>
+                <div style={{ marginTop: '6px', fontSize: '11px', lineHeight: '1.4', color: 'var(--muted-foreground)' }}>
+                  If your name was already linked to another email, sign out and sign in with that email instead.
+                </div>
+              </div>
             ) : (
               filteredMembers.map((m) => (
                 <div
