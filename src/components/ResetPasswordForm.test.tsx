@@ -1,5 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from "vitest";
 import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
+import * as matchers from "@testing-library/jest-dom/matchers";
+expect.extend(matchers);
 import { ResetPasswordForm } from "./ResetPasswordForm";
 
 // Mock global toast
@@ -12,6 +14,11 @@ vi.mock("sonner", () => ({
 
 describe("ResetPasswordForm", () => {
   let locationMock: { href: string };
+  let originalLocationDescriptor: PropertyDescriptor | undefined;
+
+  beforeAll(() => {
+    originalLocationDescriptor = Object.getOwnPropertyDescriptor(window, "location");
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -27,7 +34,14 @@ describe("ResetPasswordForm", () => {
 
   afterEach(() => {
     cleanup();
+    vi.useRealTimers();
     vi.unstubAllGlobals();
+  });
+
+  afterAll(() => {
+    if (originalLocationDescriptor) {
+      Object.defineProperty(window, "location", originalLocationDescriptor);
+    }
   });
 
   it("displays error when passwords do not match", async () => {
@@ -38,22 +52,15 @@ describe("ResetPasswordForm", () => {
 
     fireEvent.change(passInput, { target: { value: "password123" } });
     fireEvent.change(confirmInput, { target: { value: "password456" } });
-    fireEvent.submit(submitBtn.closest("form")!);
+    fireEvent.click(submitBtn);
 
     await waitFor(() => {
-      expect(screen.getByText("Passwords do not match")).toBeDefined();
+      expect(screen.getByText("Passwords do not match")).toBeInTheDocument();
     });
   });
 
   it("submits successfully and redirects to dashboard", async () => {
-    const originalSetTimeout = window.setTimeout;
-    vi.spyOn(window, "setTimeout").mockImplementation((cb: any, ms?: number) => {
-      if (ms === 1000 && cb.toString().includes("dashboard")) {
-        Promise.resolve().then(cb);
-        return 999 as any;
-      }
-      return originalSetTimeout(cb, ms);
-    });
+    vi.useFakeTimers();
 
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
@@ -68,11 +75,12 @@ describe("ResetPasswordForm", () => {
 
     fireEvent.change(passInput, { target: { value: "password123" } });
     fireEvent.change(confirmInput, { target: { value: "password123" } });
-    fireEvent.submit(submitBtn.closest("form")!);
+    fireEvent.click(submitBtn);
 
-    await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalled();
-      expect(locationMock.href).toBe("/dashboard");
-    });
+    await vi.runAllTimersAsync();
+
+    expect(mockFetch).toHaveBeenCalled();
+    expect(locationMock.href).toBe("/dashboard");
   });
 });
+
