@@ -472,6 +472,44 @@ export function createSupabaseClient(cookies: AstroCookies) {
                   };
                 };
               }
+              if (authProp === 'resetPasswordForEmail') {
+                return async (email: string, options?: any) => {
+                  const resetLink = `${options?.emailRedirectTo || ''}&code=mock-reset-code`;
+                  console.log('\n======================================');
+                  console.log(`[DEV] Password Reset requested for: ${email}`);
+                  console.log(`[DEV] Click this link to reset password:\n${resetLink}`);
+                  console.log('======================================\n');
+                  return { data: {}, error: null };
+                };
+              }
+              if (authProp === 'exchangeCodeForSession') {
+                return async (code: string) => {
+                  return {
+                    data: {
+                      session: {
+                        user: {
+                          id: mockAdminId,
+                          email: 'michellezhuang1014@gmail.com',
+                        },
+                      },
+                    },
+                    error: null,
+                  };
+                };
+              }
+              if (authProp === 'updateUser') {
+                return async (attributes: any) => {
+                  return {
+                    data: {
+                      user: {
+                        id: mockAdminId,
+                        email: 'michellezhuang1014@gmail.com',
+                      },
+                    },
+                    error: null,
+                  };
+                };
+              }
               return Reflect.get(authTarget, authProp, authReceiver);
             }
           });
