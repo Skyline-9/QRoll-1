@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
+import * as matchers from "@testing-library/jest-dom/matchers";
+expect.extend(matchers);
 import { ForgotPasswordForm } from "./ForgotPasswordForm";
 
 // Mock global toast
@@ -30,7 +32,7 @@ describe("ForgotPasswordForm", () => {
     fireEvent.submit(submitBtn.closest("form")!);
 
     await waitFor(() => {
-      expect(screen.getByText("Enter a valid email")).toBeDefined();
+      expect(screen.getByText("Enter a valid email")).toBeInTheDocument();
     });
   });
 
@@ -50,8 +52,8 @@ describe("ForgotPasswordForm", () => {
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalled();
-      expect(screen.getByText("Check your email for the link!")).toBeDefined();
-      expect(screen.getByText("Back to login")).toBeDefined();
+      expect(screen.getByText("Check your email for the link!")).toBeInTheDocument();
+      expect(screen.getByText("Back to login")).toBeInTheDocument();
     });
   });
 });

@@ -27,6 +27,20 @@ export function EmailAuthForm({ endpoint }: Props) {
   const [pending, setPending] = React.useState<"signin" | "signup" | null>(null);
   const [isShaking, setIsShaking] = React.useState(false);
 
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const errorMsg = params.get("error");
+      if (errorMsg) {
+        toast.error(errorMsg);
+        params.delete("error");
+        const newSearch = params.toString();
+        const newPath = window.location.pathname + (newSearch ? `?${newSearch}` : "");
+        window.history.replaceState({}, "", newPath);
+      }
+    }
+  }, []);
+
   const submit = async (type: "signin" | "signup") => {
     const valid = await form.trigger();
     if (!valid) {

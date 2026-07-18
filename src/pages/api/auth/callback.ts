@@ -7,7 +7,10 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
   
   if (code) {
     const supabase = createSupabaseClient(cookies);
-    const { data } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) {
+      return redirect(`/login?error=${encodeURIComponent(error.message)}`);
+    }
     if (data.session?.user?.email) {
       cookies.set('qroll_last_email', data.session.user.email, { path: '/', maxAge: 60 * 60 * 24 * 365 });
     }
