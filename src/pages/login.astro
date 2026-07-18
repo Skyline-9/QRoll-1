@@ -11,6 +11,11 @@ const supabase = createSupabaseClient(Astro.cookies);
 const { data: { session } } = await supabase.auth.getSession();
 
 if (session) {
+  const next = Astro.url.searchParams.get('next');
+  if (next && next.startsWith('/') && next !== '/dashboard') {
+    return Astro.redirect(next);
+  }
+
   const { data: memberships } = await supabase
     .from('team_members')
     .select('team_id, teams (id, company_id)')

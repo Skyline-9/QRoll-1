@@ -16,7 +16,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect, url }) => {
   const supabase = createSupabaseClient(cookies);
 
   if (type === 'signup') {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -24,6 +24,10 @@ export const POST: APIRoute = async ({ request, cookies, redirect, url }) => {
       },
     });
     if (error) return new Response(error.message, { status: 400 });
+    // Supabase returns an empty identities array (instead of an error) when the email is already registered
+    if (data.user && data.user.identities?.length === 0) {
+      return new Response('An account with this email already exists. Try signing in instead.', { status: 409 });
+    }
     return new Response('Check your email for the confirmation link!', { status: 200 });
   } else {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
