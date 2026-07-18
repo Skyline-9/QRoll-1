@@ -30,8 +30,11 @@ export const POST: APIRoute = async ({ request, cookies, redirect, url }) => {
     }
     return new Response('Check your email for the confirmation link!', { status: 200 });
   } else {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return new Response(error.message, { status: 400 });
+    if (data.session?.user?.email) {
+      cookies.set('qroll_last_email', data.session.user.email, { path: '/', maxAge: 60 * 60 * 24 * 365 });
+    }
     return redirect(next);
   }
 };
