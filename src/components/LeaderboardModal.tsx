@@ -2,28 +2,19 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUpRight, X } from "lucide-react";
 import { cn } from "../lib/utils";
-
-export interface LeaderboardRow {
-  id: string;
-  name: string;
-  present: number;
-  late: number;
-  absent: number;
-  total: number;
-  attendanceRate: number;
-}
+import type { AttendeeStat } from "../lib/attendanceTypes";
 
 export type LeaderboardVariant = "top" | "least" | "late";
 
 interface LeaderboardModalProps {
   title: string;
   description?: string;
-  rows: LeaderboardRow[];
+  rows: AttendeeStat[];
   variant: LeaderboardVariant;
   triggerLabel?: string;
 }
 
-function rowMeta(row: LeaderboardRow, variant: LeaderboardVariant) {
+function rowMeta(row: AttendeeStat, variant: LeaderboardVariant) {
   if (variant === "top") {
     return {
       sub: `${row.present} present · ${row.late} late · ${row.absent} absent`,
@@ -53,12 +44,38 @@ export default function LeaderboardModal({
   triggerLabel = "View all",
 }: LeaderboardModalProps) {
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
+    const trigger = triggerRef.current;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        return;
+      }
+      // Trap Tab focus inside the dialog while it is open
+      if (e.key !== "Tab" || !dialogRef.current) return;
+      const items = Array.from(
+        dialogRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((el) => !el.hasAttribute("disabled"));
+      if (items.length === 0) {
+        e.preventDefault();
+        return;
+      }
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener("keydown", onKeyDown);
     const prevOverflow = document.body.style.overflow;
@@ -67,12 +84,15 @@ export default function LeaderboardModal({
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = prevOverflow;
+      // Restore focus to the trigger that opened the modal
+      trigger?.focus();
     };
   }, [open ]);
 
   return (
     <>
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen(true)}
         className="inline-flex shrink-0 items-center gap-0.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -95,6 +115,7 @@ export default function LeaderboardModal({
             aria-label={title}
           >
             <motion.div
+              ref={dialogRef}
               initial={{ opacity: 0, y: 16, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 16, scale: 0.98 }}

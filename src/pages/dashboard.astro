@@ -7,7 +7,7 @@ import AstroButton from '../components/AstroButton.astro';
 import { AttendanceMatrix } from '../components/AttendanceMatrix';
 import { PerEventStackedBars, TopAttendeesChart } from '../components/DashboardCharts';
 import LeaderboardModal from '../components/LeaderboardModal';
-import type { AttendanceData, AttendanceStatus, AttendanceRecord } from '../lib/attendanceTypes';
+import type { AttendanceData, AttendanceStatus, AttendanceRecord, AttendeeStat } from '../lib/attendanceTypes';
 import { Users, Calendar } from 'lucide-react';
 
 const supabase = createSupabaseClient(Astro.cookies);
@@ -225,15 +225,6 @@ const data: AttendanceData = {
 };
 
 // Stats
-type AttendeeStat = {
-  id: string;
-  name: string;
-  present: number;
-  late: number;
-  absent: number;
-  total: number;
-  attendanceRate: number;
-};
 const stats: AttendeeStat[] = data.attendees.map(a => {
   const present = a.records.filter(r => r.status === 'present').length;
   const late = a.records.filter(r => r.status === 'late').length;
@@ -249,17 +240,15 @@ const totalAbsent = stats.reduce((s, a) => s + a.absent, 0);
 const totalRecords = totalPresent + totalLate + totalAbsent;
 const onTimeRate = totalRecords > 0 ? Math.round((totalPresent / totalRecords) * 100) : 0;
 
-const topAttendees = [...stats].sort((a, b) => (b.present + b.late) - (a.present + a.late)).slice(0, 8);
-const leastAttendees = [...stats]
-  .filter(s => s.total > 0)
-  .sort((a, b) => (a.present + a.late) - (b.present + b.late))
-  .slice(0, 5);
-const mostLate = [...stats].filter(s => s.late > 0).sort((a, b) => b.late - a.late).slice(0, 5);
+// Ranked lists shared by the preview widgets and the "View all" modals,
+// so both always show the same members in the same order.
+const rankedTopAttendees = [...stats].sort((a, b) => (b.present + b.late) - (a.present + a.late));
+const rankedLeastActive = [...stats].filter(s => s.total > 0).sort((a, b) => (a.present + a.late) - (b.present + b.late));
+const rankedMostLate = [...stats].filter(s => s.late > 0).sort((a, b) => b.late - a.late);
 
-// Full sorted lists for the "View all" modals
-const allTopAttendees = [...stats].sort((a, b) => (b.present + b.late) - (a.present + a.late));
-const allLeastActive = [...stats].sort((a, b) => (a.present + a.late) - (b.present + b.late));
-const allMostLate = [...stats].sort((a, b) => b.late - a.late);
+const topAttendees = rankedTopAttendees.slice(0, 8);
+const leastAttendees = rankedLeastActive.slice(0, 5);
+const mostLate = rankedMostLate.slice(0, 5);
 
 const perEventStats = dates.map(d => {
   let p = 0, l = 0, ab = 0;
@@ -405,7 +394,7 @@ const hasData = filteredRoster.length > 0 && events.length > 0;
                       <LeaderboardModal
                         title="Top attendees"
                         description="All members sorted by attendance count"
-                        rows={allTopAttendees}
+                        rows={rankedTopAttendees}
                         variant="top"
                         client:load
                       />
@@ -437,7 +426,7 @@ const hasData = filteredRoster.length > 0 && events.length > 0;
                       <LeaderboardModal
                         title="Least active"
                         description="All members sorted by lowest attendance count"
-                        rows={allLeastActive}
+                        rows={rankedLeastActive}
                         variant="least"
                         client:load
                       />
@@ -464,7 +453,7 @@ const hasData = filteredRoster.length > 0 && events.length > 0;
                       <LeaderboardModal
                         title="Most late arrivals"
                         description="All members sorted by total late check-ins"
-                        rows={allMostLate}
+                        rows={rankedMostLate}
                         variant="late"
                         client:load
                       />
